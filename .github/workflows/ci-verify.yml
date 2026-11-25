@@ -1,0 +1,39 @@
+name: CI Verify (kwdb/kwdb)
+
+on:
+  push:
+    branches: ["ci/gha-verify"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-verify-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 240
+    steps:
+      - name: Clone upstream source (Gitee, with submodules)
+        run: |
+          git clone --depth=1 --recurse-submodules --shallow-submodules https://gitee.com/kwdb/kwdb.git source
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: source/kwbase/go.mod
+          cache: false
+      - name: Install build deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential ccache libssl-dev
+          ccache --max-size=500M
+      - name: Build KWDB
+        working-directory: source
+        run: make build
+      - name: Show artifacts
+        working-directory: source
+        run: |
+          ls -lh kwbase/bin 2>/dev/null || true
+          find . -maxdepth 3 \( -name "kwbase" -o -name "kw-ts-engine*" \) | head
