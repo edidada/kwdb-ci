@@ -22,12 +22,12 @@ jobs:
           git clone --depth=1 --recurse-submodules --shallow-submodules https://gitee.com/kwdb/kwdb.git source
       - uses: actions/setup-go@v5
         with:
-          go-version-file: source/kwbase/go.mod
+          go-version: "1.22"
           cache: false
       - name: Install build deps
         run: |
           sudo apt-get update
-          sudo apt-get install -y cmake build-essential ccache libssl-dev
+          sudo apt-get install -y cmake build-essential ccache libssl-dev libprotobuf-dev libprotoc-dev liblzma-dev libncurses-dev
           ccache --max-size=500M
       - name: Build KWDB
         working-directory: source
